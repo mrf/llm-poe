@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-poe"
+version = "0.2.0"
+description = "Plugin for LLM adding support for Poe API models"
+readme = "README.md"
+authors = [{name = "Mark Ferree"}]
+license = {text = "Apache-2.0"}
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "llm>=0.13",
+    "httpx",
+    "pydantic"
+]
+
+[project.urls]
+Homepage = "https://github.com/mrf/llm-poe"
+Documentation = "https://github.com/mrf/llm-poe"
+Issues = "https://github.com/mrf/llm-poe/issues"
+Changelog = "https://github.com/mrf/llm-poe/releases"
+
+[project.entry-points.llm]
+poe = "llm_poe"
