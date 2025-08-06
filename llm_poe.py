@@ -9,6 +9,15 @@ import os
 
 POE_API_BASE = "https://api.poe.com/v1"
 
+# Fallback models to use when API is unavailable
+FALLBACK_MODELS = [
+    {"id": "GPT-4o", "object": "model"},
+    {"id": "Claude-Sonnet-4", "object": "model"}, 
+    {"id": "Gemini-2.5-Pro", "object": "model"},
+    {"id": "Llama-3.1-405B", "object": "model"},
+    {"id": "Grok-4", "object": "model"}
+]
+
 # Cache for model list to avoid frequent API calls
 _model_cache = None
 _cache_timestamp = None
@@ -46,14 +55,7 @@ def fetch_available_models() -> List[Dict[str, Any]]:
     api_key = get_api_key_optional()
     if not api_key:
         # Return fallback models if no API key available
-        fallback_models = [
-            {"id": "GPT-4o", "object": "model"},
-            {"id": "Claude-Sonnet-4", "object": "model"}, 
-            {"id": "Gemini-2.5-Pro", "object": "model"},
-            {"id": "Llama-3.1-405B", "object": "model"},
-            {"id": "Grok-4", "object": "model"}
-        ]
-        return fallback_models
+        return FALLBACK_MODELS
     
     try:
         headers = {
@@ -81,15 +83,8 @@ def fetch_available_models() -> List[Dict[str, Any]]:
     
     except Exception as e:
         # If API call fails, return a fallback list of common models
-        fallback_models = [
-            {"id": "GPT-4o", "object": "model"},
-            {"id": "Claude-Sonnet-4", "object": "model"}, 
-            {"id": "Gemini-2.5-Pro", "object": "model"},
-            {"id": "Llama-3.1-405B", "object": "model"},
-            {"id": "Grok-4", "object": "model"}
-        ]
         print(f"Warning: Failed to fetch models from Poe API ({e}), using fallback list")
-        return fallback_models
+        return FALLBACK_MODELS
 
 
 class PoeOptions(llm.Options):
@@ -200,7 +195,7 @@ def register_models(register):
                 register(PoeModel(model_id, model_name))
     except Exception as e:
         # Register fallback models if dynamic loading fails
-        fallback_models = ["GPT-4o", "Claude-Sonnet-4", "Gemini-2.5-Pro", "Llama-3.1-405B", "Grok-4"]
-        for model_name in fallback_models:
+        for model_data in FALLBACK_MODELS:
+            model_name = model_data["id"]
             model_id = f"poe/{model_name.lower().replace('-', '_')}"
             register(PoeModel(model_id, model_name))
