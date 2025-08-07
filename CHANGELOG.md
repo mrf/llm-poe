@@ -2,7 +2,7 @@
 
 **Date:** 2025-08-06
 
-## Initial Plugin Implementation (v0.1.0)
+## Initial Plugin Implementation (v0.1)
 
 ### Research & Planning
 - Analyzed existing LLM plugins (llm-anthropic, llm-gemini) to understand architecture patterns
@@ -40,7 +40,7 @@
 
 The plugin is now ready for testing and distribution, providing seamless integration between the LLM CLI tool and Poe's diverse model ecosystem.
 
-## Dynamic Model Support Update (v0.2.0) - COMPLETED
+## Dynamic Model Support Update (v0.2) - COMPLETED
 
 **Date:** 2025-08-06
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llm-poe"
-version = "0.2.0"
+version = "0.2"
 description = "Plugin for LLM adding support for Poe API models"
 readme = "README.md"
 authors = [{name = "Mark Ferree"}]
