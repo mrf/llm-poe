@@ -112,3 +112,6 @@ pip install -e .
 ## License
 
 Apache-2.0
+
+---
+*This plugin was created with assistance from Claude.*
