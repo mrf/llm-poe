@@ -52,12 +52,6 @@ Run a prompt:
 llm -m poe/gpt_4o "Hello, how are you?"
 ```
 
-Use streaming:
-
-```bash
-llm -m poe/claude_sonnet_4 "Write a haiku about programming" --stream
-```
-
 ## Available Models
 
 The plugin dynamically fetches all models available through Poe's API, including:
