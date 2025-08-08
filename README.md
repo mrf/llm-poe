@@ -2,6 +2,8 @@
 
 Plugin for [LLM](https://llm.datasette.io/) adding support for Poe API models. This plugin dynamically fetches all available models from Poe's API, ensuring you always have access to the latest models.
 
+**Note:** This is an initial first version that works well for text-only interactions. Image and video models are listed but not yet configured to handle their specific input/output formats.
+
 ## Installation
 
 Install this plugin in the same environment as LLM:
