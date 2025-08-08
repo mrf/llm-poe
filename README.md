@@ -108,8 +108,10 @@ To set up for development:
 ```bash
 git clone https://github.com/mrf/llm-poe
 cd llm-poe
-pip install -e .
+llm install -e .
 ```
+
+**Important:** Use `llm install -e .` (not `pip install -e .`) for local development to ensure proper plugin discovery.
 
 ## License
 
