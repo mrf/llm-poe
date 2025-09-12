@@ -1,8 +1,10 @@
 # llm-poe
 
+Reference https://creator.poe.com/docs/external-applications/external-application-guide#sending-files-in-the-query
+
 Plugin for [LLM](https://llm.datasette.io/) adding support for Poe API models. This plugin dynamically fetches all available models from Poe's API, ensuring you always have access to the latest models.
 
-**Note:** This is an initial first version that works well for text-only interactions. Image and video models are listed but not yet configured to handle their specific input/output formats.
+**✅ Full Multi-Modal Support:** Works with text, image generation, video generation, and audio/TTS models with optimized handling for each content type.
 
 ## Installation
 
@@ -46,10 +48,20 @@ llm models list | grep poe/
 
 The plugin automatically fetches all available models from Poe's API. The model list is cached for 1 hour to improve performance. Over **240+ models** are currently available including the latest AI models from OpenAI, Anthropic, Google, Meta, and more.
 
-Run a prompt:
+Run prompts with different model types:
 
 ```bash
+# Text generation
 llm -m poe/gpt_4o "Hello, how are you?"
+
+# Image generation
+llm -m poe/flux_pro_1_1_ultra "Generate a cat image" --no-stream
+
+# Video generation  
+llm -m poe/sora "Create a short video of a sunset" --no-stream
+
+# Audio/TTS
+llm -m poe/elevenlabs_v3 "Say hello world" --no-stream
 ```
 
 ## Available Models
@@ -89,10 +101,24 @@ And **200+ more models**! Use `llm models list | grep poe/` to see the complete 
 
 ## Options
 
-You can set temperature and max_tokens:
-
+**Text Models:**
 ```bash
 llm -m poe/claude_sonnet_4 "Tell me a story" -o temperature 0.7 -o max_tokens 500
+```
+
+**Image Models:**
+```bash
+llm -m poe/flux_pro_1_1_ultra "Generate landscape" -o size 1024x1024 -o quality standard --no-stream
+```
+
+**Video Models:**
+```bash
+llm -m poe/sora "Create a nature scene" -o duration 10 -o aspect_ratio 16:9 --no-stream
+```
+
+**Audio Models:**
+```bash
+llm -m poe/elevenlabs_v3 "Read this text" -o voice alloy -o speed 1.0 --no-stream
 ```
 
 ## Development

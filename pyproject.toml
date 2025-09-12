@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llm-poe"
-version = "0.2"
-description = "Plugin for LLM adding support for Poe API models"
+version = "0.3"
+description = "Plugin for LLM adding support for Poe API models with full multi-modal support (text, image, video, audio)"
 readme = "README.md"
 authors = [{name = "Mark Ferree"}]
 license = {text = "Apache-2.0"}

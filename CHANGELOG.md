@@ -80,3 +80,22 @@ The plugin is now ready for testing and distribution, providing seamless integra
 ✅ All model types supported (text, image, video, audio, search-enhanced)  
 ✅ Caching mechanism functional  
 ✅ Fallback handling operational
+
+## Non-Text Model Support Implementation (v0.3) - COMPLETED
+
+**Date:** 2025-09-12
+
+### Multi-Modal Model Architecture
+- **Specialized Model Classes**: Implemented dedicated model classes for different content types:
+  * `PoeImageModel` - for image generation (Flux, Imagen, DALL-E, Ideogram, etc.)
+  * `PoeVideoModel` - for video generation (Sora, Runway, Veo, Kling, etc.)
+  * `PoeAudioModel` - for audio/TTS generation (ElevenLabs, Cartesia, Orpheus, etc.)
+
+### Intelligent Model Type Detection
+- **Dynamic Detection System**: Created flexible model type detection using keyword matching
+- **Model-Specific Options**: Added size/quality for images, duration/aspect_ratio for video, voice/speed for audio
+
+### Testing Results
+✅ Image Generation: `poe/flux_pro_1_1_ultra` → Generated image URLs  
+✅ Audio/TTS: `poe/elevenlabs_v3` → Generated audio URLs  
+✅ Video Generation: `poe/sora` → Generated video URLs
