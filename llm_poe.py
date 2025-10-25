@@ -6,6 +6,7 @@ import json
 import time
 import os
 
+__version__ = "0.4.0"
 
 POE_API_BASE = "https://api.poe.com/v1"
 

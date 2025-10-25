@@ -1,0 +1,76 @@
+# Dependabot configuration for llm-poe
+# See: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Monitor Python dependencies in pyproject.toml
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    # Group dependency updates to reduce PR noise
+    groups:
+      # Core runtime dependencies
+      core-dependencies:
+        patterns:
+          - "llm"
+          - "httpx"
+          - "pydantic"
+      # Testing dependencies
+      test-dependencies:
+        patterns:
+          - "pytest*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Keep PRs manageable
+    open-pull-requests-limit: 5
+    # Add helpful labels
+    labels:
+      - "dependencies"
+      - "python"
+    # Prefix commit messages with conventional commits style
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    # Set reviewers (adjust as needed)
+    # reviewers:
+    #   - "mrf"
+    # Set assignees (adjust as needed)
+    # assignees:
+    #   - "mrf"
+
+  # Monitor GitHub Actions versions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    # Group all GitHub Actions updates together
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    # Keep PRs manageable
+    open-pull-requests-limit: 3
+    # Add helpful labels
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci"
+    # Prefix commit messages with conventional commits style
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    # Set reviewers (adjust as needed)
+    # reviewers:
+    #   - "mrf"
+    # Set assignees (adjust as needed)
+    # assignees:
+    #   - "mrf"

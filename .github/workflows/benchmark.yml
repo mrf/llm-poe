@@ -1,0 +1,266 @@
+name: Performance Benchmarks
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for comparing with main branch
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[test]"
+
+    - name: Run benchmarks on current branch
+      run: |
+        pytest tests/test_benchmarks.py --benchmark-only --benchmark-json=benchmark-current.json --benchmark-columns=min,max,mean,stddev,median,ops,rounds
+
+    - name: Upload current benchmark results
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-current
+        path: benchmark-current.json
+
+    - name: Checkout main branch for comparison
+      if: github.event_name == 'pull_request'
+      run: |
+        git fetch origin main:main
+        git checkout main
+
+    - name: Install dependencies on main
+      if: github.event_name == 'pull_request'
+      run: |
+        pip install -e ".[test]"
+
+    - name: Run benchmarks on main branch
+      if: github.event_name == 'pull_request'
+      continue-on-error: true
+      run: |
+        pytest tests/test_benchmarks.py --benchmark-only --benchmark-json=benchmark-main.json --benchmark-columns=min,max,mean,stddev,median,ops,rounds || echo "Main branch benchmarks failed, will skip comparison"
+
+    - name: Upload main benchmark results
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-main
+        path: benchmark-main.json
+
+    - name: Checkout PR branch again
+      if: github.event_name == 'pull_request'
+      run: |
+        git checkout ${{ github.event.pull_request.head.sha }}
+
+    - name: Compare benchmarks and create report
+      if: github.event_name == 'pull_request'
+      id: benchmark-compare
+      run: |
+        python3 << 'EOF'
+        import json
+        import sys
+        from pathlib import Path
+
+        # Load benchmark results
+        try:
+            with open('benchmark-current.json') as f:
+                current = json.load(f)
+        except FileNotFoundError:
+            print("Error: Current benchmark results not found")
+            sys.exit(1)
+
+        # Try to load main branch results
+        try:
+            with open('benchmark-main.json') as f:
+                main = json.load(f)
+            has_main = True
+        except FileNotFoundError:
+            print("Warning: Main branch benchmark results not found, skipping comparison")
+            has_main = False
+
+        # Build benchmark comparison
+        current_benchmarks = {b['name']: b for b in current['benchmarks']}
+
+        if has_main:
+            main_benchmarks = {b['name']: b for b in main['benchmarks']}
+        else:
+            main_benchmarks = {}
+
+        # Create markdown report
+        report_lines = ["## Performance Benchmark Results\n"]
+
+        if has_main:
+            report_lines.append("Comparison between PR and main branch:\n")
+        else:
+            report_lines.append("Benchmark results for this PR (no baseline available):\n")
+
+        report_lines.append("| Benchmark | Current (mean) | Main (mean) | Change | Status |")
+        report_lines.append("|-----------|----------------|-------------|--------|--------|")
+
+        significant_regressions = []
+        significant_improvements = []
+        REGRESSION_THRESHOLD = 0.20  # 20% slower is a regression
+        IMPROVEMENT_THRESHOLD = 0.20  # 20% faster is an improvement
+
+        for name, current_bench in sorted(current_benchmarks.items()):
+            current_mean = current_bench['stats']['mean']
+            current_mean_ms = current_mean * 1000  # Convert to ms
+
+            if has_main and name in main_benchmarks:
+                main_mean = main_benchmarks[name]['stats']['mean']
+                main_mean_ms = main_mean * 1000
+
+                # Calculate percentage change
+                if main_mean > 0:
+                    pct_change = ((current_mean - main_mean) / main_mean) * 100
+                else:
+                    pct_change = 0
+
+                # Determine status
+                if pct_change > (REGRESSION_THRESHOLD * 100):
+                    status = "⚠️ REGRESSION"
+                    significant_regressions.append((name, pct_change))
+                elif pct_change < -(IMPROVEMENT_THRESHOLD * 100):
+                    status = "✅ IMPROVED"
+                    significant_improvements.append((name, pct_change))
+                else:
+                    status = "✓ OK"
+
+                change_str = f"{pct_change:+.1f}%"
+                main_str = f"{main_mean_ms:.3f}ms"
+            else:
+                change_str = "N/A"
+                main_str = "N/A"
+                status = "NEW"
+
+            current_str = f"{current_mean_ms:.3f}ms"
+
+            # Truncate long test names for readability
+            display_name = name.replace('test_benchmark_', '')
+            if len(display_name) > 50:
+                display_name = display_name[:47] + "..."
+
+            report_lines.append(f"| {display_name} | {current_str} | {main_str} | {change_str} | {status} |")
+
+        # Add summary section
+        report_lines.append("\n### Summary\n")
+        report_lines.append(f"- Total benchmarks: {len(current_benchmarks)}")
+
+        if has_main:
+            report_lines.append(f"- Significant regressions (>{REGRESSION_THRESHOLD*100:.0f}% slower): {len(significant_regressions)}")
+            report_lines.append(f"- Significant improvements (>{IMPROVEMENT_THRESHOLD*100:.0f}% faster): {len(significant_improvements)}")
+
+            if significant_regressions:
+                report_lines.append("\n#### ⚠️ Performance Regressions")
+                for name, pct in sorted(significant_regressions, key=lambda x: x[1], reverse=True):
+                    display_name = name.replace('test_benchmark_', '')
+                    report_lines.append(f"- **{display_name}**: {pct:+.1f}%")
+
+            if significant_improvements:
+                report_lines.append("\n#### ✅ Performance Improvements")
+                for name, pct in sorted(significant_improvements, key=lambda x: x[1]):
+                    display_name = name.replace('test_benchmark_', '')
+                    report_lines.append(f"- **{display_name}**: {pct:+.1f}%")
+
+        report_lines.append("\n---")
+        report_lines.append("\nDetailed benchmark results are available in the workflow artifacts.")
+
+        # Write report to file
+        report = '\n'.join(report_lines)
+        with open('benchmark-report.md', 'w') as f:
+            f.write(report)
+
+        print(report)
+
+        # Set outputs for next steps
+        with open('GITHUB_OUTPUT', 'a') as f:
+            f.write(f"regression_count={len(significant_regressions)}\n")
+            f.write(f"improvement_count={len(significant_improvements)}\n")
+            f.write(f"has_regressions={'true' if significant_regressions else 'false'}\n")
+
+        # Exit with error if significant regressions found
+        if significant_regressions:
+            print(f"\n⚠️  Found {len(significant_regressions)} significant performance regression(s)")
+            sys.exit(1)
+        else:
+            print("\n✅ No significant performance regressions detected")
+            sys.exit(0)
+        EOF
+
+    - name: Post benchmark results as PR comment
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+
+          let report;
+          try {
+            report = fs.readFileSync('benchmark-report.md', 'utf8');
+          } catch (error) {
+            console.log('No benchmark report found, skipping comment');
+            return;
+          }
+
+          // Find existing benchmark comment
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+
+          const botComment = comments.find(comment =>
+            comment.user.type === 'Bot' &&
+            comment.body.includes('Performance Benchmark Results')
+          );
+
+          const commentBody = report;
+
+          if (botComment) {
+            // Update existing comment
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: commentBody
+            });
+          } else {
+            // Create new comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: commentBody
+            });
+          }
+
+    - name: Upload benchmark report
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-report
+        path: benchmark-report.md
+
+    - name: Check for performance regressions
+      if: github.event_name == 'pull_request' && steps.benchmark-compare.outputs.has_regressions == 'true'
+      run: |
+        echo "⚠️  Performance regression detected!"
+        echo "Review the benchmark results above for details."
+        echo "If this regression is acceptable, document the reason in the PR description."
+        exit 1
