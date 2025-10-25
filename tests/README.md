@@ -155,7 +155,7 @@ start htmlcov/index.html  # Windows
 Tests run automatically on:
 - Every push to main branch
 - Every pull request
-- Multiple Python versions (3.8, 3.9, 3.10, 3.11, 3.12)
+- Multiple Python versions (3.9, 3.10, 3.11, 3.12)
 - Multiple platforms (Ubuntu, macOS, Windows)
 
 See `.github/workflows/test.yml` for CI configuration.

@@ -130,7 +130,7 @@ The plugin is now ready for testing and distribution, providing seamless integra
 ### CI/CD Integration
 - **GitHub Actions Workflow**: Automated testing on every push and PR
 - **Multi-Platform Testing**: Ubuntu, macOS, Windows
-- **Multi-Version Testing**: Python 3.8, 3.9, 3.10, 3.11, 3.12
+- **Multi-Version Testing**: Python 3.9, 3.10, 3.11, 3.12
 - **Code Quality Checks**: Black formatting, isort import sorting, ruff linting
 - **Coverage Reporting**: HTML and XML coverage reports, Codecov integration
 

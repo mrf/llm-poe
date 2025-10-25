@@ -80,8 +80,8 @@ These checks run automatically in CI/CD.
 
 **Matrix Testing:**
 - **Platforms:** Ubuntu, macOS, Windows
-- **Python Versions:** 3.8, 3.9, 3.10, 3.11, 3.12
-- **Total Combinations:** 15 test runs per push
+- **Python Versions:** 3.9, 3.10, 3.11, 3.12
+- **Total Combinations:** 12 test runs per push
 
 ### Coverage Badge Workflow
 

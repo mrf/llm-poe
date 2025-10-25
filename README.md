@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/mrf/llm-poe/actions/workflows/test.yml/badge.svg)](https://github.com/mrf/llm-poe/actions/workflows/test.yml)
 [![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/mrf/llm-poe/actions)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 Plugin for [LLM](https://llm.datasette.io/) adding support for Poe API models. This plugin dynamically fetches all available models from Poe's API, ensuring you always have access to the latest models.
@@ -164,7 +164,7 @@ xdg-open htmlcov/index.html  # Linux
 - **136 automated tests** covering all functionality
 - **94% code coverage** across the entire plugin
 - **Multi-platform testing** (Ubuntu, macOS, Windows)
-- **Python 3.8-3.12 compatibility** verified
+- **Python 3.9-3.12 compatibility** verified
 
 Test categories:
 - Unit tests for model registration, API keys, and type detection
