@@ -4,3 +4,11 @@ __pycache__/
 *.egg-info/
 CLAUDE.md
 AGENTS.md
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+coverage.xml
+*.cover
+.hypothesis/

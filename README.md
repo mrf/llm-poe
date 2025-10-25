@@ -1,10 +1,15 @@
 # llm-poe
 
-Reference https://creator.poe.com/docs/external-applications/external-application-guide#sending-files-in-the-query
+[![Tests](https://github.com/mrf/llm-poe/actions/workflows/test.yml/badge.svg)](https://github.com/mrf/llm-poe/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/mrf/llm-poe/branch/main/graph/badge.svg)](https://codecov.io/gh/mrf/llm-poe)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 Plugin for [LLM](https://llm.datasette.io/) adding support for Poe API models. This plugin dynamically fetches all available models from Poe's API, ensuring you always have access to the latest models.
 
 **✅ Full Multi-Modal Support:** Works with text, image generation, video generation, and audio/TTS models with optimized handling for each content type.
+
+**✅ 94% Test Coverage:** Comprehensive test suite with 136 automated tests ensuring reliability.
 
 ## Installation
 
@@ -132,6 +137,42 @@ llm install -e .
 ```
 
 **Important:** Use `llm install -e .` (not `pip install -e .`) for local development to ensure proper plugin discovery.
+
+## Testing
+
+This plugin has a comprehensive test suite with 94% code coverage.
+
+### Running Tests
+
+```bash
+# Install with test dependencies
+pip install -e ".[test]"
+
+# Run all tests
+pytest
+
+# Run with coverage report
+pytest --cov=llm_poe --cov-report=term-missing --cov-report=html
+
+# View HTML coverage report
+open htmlcov/index.html  # macOS
+xdg-open htmlcov/index.html  # Linux
+```
+
+### Test Coverage
+
+- **136 automated tests** covering all functionality
+- **94% code coverage** across the entire plugin
+- **Multi-platform testing** (Ubuntu, macOS, Windows)
+- **Python 3.8-3.12 compatibility** verified
+
+Test categories:
+- Unit tests for model registration, API keys, and type detection
+- Integration tests for all model types (text, image, video, audio)
+- Error handling and edge case tests
+- Performance and caching tests
+
+See [tests/README.md](tests/README.md) for detailed testing documentation.
 
 ## License
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llm-poe"
-version = "0.3"
+version = "0.4"
 description = "Plugin for LLM adding support for Poe API models with full multi-modal support (text, image, video, audio)"
 readme = "README.md"
 authors = [{name = "Mark Ferree"}]
@@ -26,6 +26,14 @@ dependencies = [
     "pydantic"
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+    "pytest-httpx>=0.21.0",
+    "pytest-cov>=4.0",
+    "pytest-asyncio>=0.21.0"
+]
+
 [project.urls]
 Homepage = "https://github.com/mrf/llm-poe"
 Documentation = "https://github.com/mrf/llm-poe"
@@ -34,3 +42,32 @@ Changelog = "https://github.com/mrf/llm-poe/releases"
 
 [project.entry-points.llm]
 poe = "llm_poe"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--cov=llm_poe",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+
+[tool.coverage.run]
+source = ["llm_poe"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]

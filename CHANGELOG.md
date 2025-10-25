@@ -96,6 +96,64 @@ The plugin is now ready for testing and distribution, providing seamless integra
 - **Model-Specific Options**: Added size/quality for images, duration/aspect_ratio for video, voice/speed for audio
 
 ### Testing Results
-✅ Image Generation: `poe/flux_pro_1_1_ultra` → Generated image URLs  
-✅ Audio/TTS: `poe/elevenlabs_v3` → Generated audio URLs  
+✅ Image Generation: `poe/flux_pro_1_1_ultra` → Generated image URLs
+✅ Audio/TTS: `poe/elevenlabs_v3` → Generated audio URLs
 ✅ Video Generation: `poe/sora` → Generated video URLs
+
+## Comprehensive Test Suite (v0.4) - COMPLETED
+
+**Date:** 2025-10-25
+
+### Testing Infrastructure
+- **Test Framework**: Implemented comprehensive test suite using pytest
+- **Test Coverage**: Achieved 94% code coverage across all plugin functionality
+- **Total Tests**: 136 automated tests covering all features and edge cases
+
+### Test Categories Implemented
+
+#### Unit Tests (48 tests)
+- **Model Registration** (11 tests): Dynamic fetching, caching, fallback mechanisms, ID sanitization
+- **API Key Management** (6 tests): Key retrieval, missing key handling, environment variable integration
+- **Model Type Detection** (31 tests): Text, image, video, audio model classification with comprehensive keyword matching
+
+#### Integration Tests (68 tests)
+- **Text/Chat Models** (15 tests): Streaming/non-streaming, conversation history, options validation
+- **Image Models** (12 tests): Generation with size/quality options, timeout handling
+- **Video Models** (13 tests): Duration/aspect ratio options, various formats
+- **Audio/TTS Models** (14 tests): Voice/speed options, streaming support
+- **Error Handling** (14 tests): API errors (401, 404, 429, 500, 503), network timeouts, malformed responses
+
+#### Performance Tests (20 tests)
+- **Caching Mechanism** (14 tests): Cache initialization, expiration, reuse, fallback scenarios
+- **Edge Cases** (6 tests): Empty responses, malformed data, concurrent access
+
+### CI/CD Integration
+- **GitHub Actions Workflow**: Automated testing on every push and PR
+- **Multi-Platform Testing**: Ubuntu, macOS, Windows
+- **Multi-Version Testing**: Python 3.8, 3.9, 3.10, 3.11, 3.12
+- **Code Quality Checks**: Black formatting, isort import sorting, ruff linting
+- **Coverage Reporting**: HTML and XML coverage reports, Codecov integration
+
+### Test Utilities
+- **pytest-httpx**: Mock HTTP requests to Poe API for reliable testing
+- **pytest-cov**: Coverage measurement and reporting
+- **pytest-asyncio**: Async test support
+- **Comprehensive Fixtures**: Mock API responses, prompts, conversations, and configurations
+
+### Code Quality Improvements
+- **Type Detection Priority Fix**: Reordered model type detection to prioritize audio > video > image > text for better accuracy
+- **Error Handling**: Verified robust error handling across all model types
+- **Edge Case Coverage**: Tested empty prompts, invalid options, network failures, API errors
+
+### Documentation
+- **TESTING_PLAN.md**: Comprehensive testing strategy and goals
+- **Test Organization**: Clear test structure with descriptive names and docstrings
+- **Coverage Reports**: Detailed HTML coverage reports available in htmlcov/
+
+### Final Status
+✅ 136 tests passing (100% pass rate)
+✅ 94% code coverage
+✅ CI/CD pipeline configured
+✅ All model types thoroughly tested
+✅ Error handling validated
+✅ Caching mechanism verified

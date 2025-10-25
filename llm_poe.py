@@ -109,13 +109,14 @@ def get_model_type(model_name: str) -> str:
         'voice', 'audio', 'speak', 'sound', 'music'
     ]
     
-    # Check for type indicators
-    if any(indicator in name_lower for indicator in image_indicators):
-        return 'image'
-    elif any(indicator in name_lower for indicator in video_indicators):
-        return 'video' 
-    elif any(indicator in name_lower for indicator in audio_indicators):
+    # Check for type indicators (check more specific ones first)
+    # Check audio first as it has more specific names
+    if any(indicator in name_lower for indicator in audio_indicators):
         return 'audio'
+    elif any(indicator in name_lower for indicator in video_indicators):
+        return 'video'
+    elif any(indicator in name_lower for indicator in image_indicators):
+        return 'image'
     
     # Default to text for traditional LLMs
     return 'text'
