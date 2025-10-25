@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        persist-credentials: false
+        persist-credentials: true
         fetch-depth: 0
 
     - name: Set up Python
@@ -27,25 +27,41 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -e ".[test]"
-        pip install coverage-badge
 
     - name: Run tests with coverage
       run: |
-        pytest --cov=llm_poe --cov-report=term-missing
+        pytest --cov=llm_poe --cov-report=xml
 
-    - name: Generate coverage badge
+    - name: Extract coverage percentage
+      id: coverage
       run: |
-        coverage-badge -o .github/coverage.svg -f
+        COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(f\"{float(root.attrib['line-rate']) * 100:.0f}\")")
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+        echo "Coverage: $COVERAGE%"
 
-    - name: Commit badge
+    - name: Update README badge
+      run: |
+        COVERAGE=${{ steps.coverage.outputs.percentage }}
+        COLOR="brightgreen"
+        if [ $COVERAGE -lt 80 ]; then
+          COLOR="yellow"
+        fi
+        if [ $COVERAGE -lt 60 ]; then
+          COLOR="orange"
+        fi
+        if [ $COVERAGE -lt 40 ]; then
+          COLOR="red"
+        fi
+
+        sed -i "s/coverage-[0-9]*%25-[a-z]*/coverage-${COVERAGE}%25-${COLOR}/" README.md
+
+    - name: Commit changes
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add .github/coverage.svg
-        git diff --quiet && git diff --staged --quiet || git commit -m "Update coverage badge"
+        git add README.md
+        git diff --quiet && git diff --staged --quiet || git commit -m "Update coverage badge to ${COVERAGE}%"
 
     - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: ${{ github.ref }}
+      run: |
+        git push

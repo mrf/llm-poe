@@ -1,7 +1,7 @@
 # llm-poe
 
 [![Tests](https://github.com/mrf/llm-poe/actions/workflows/test.yml/badge.svg)](https://github.com/mrf/llm-poe/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/mrf/llm-poe/branch/main/graph/badge.svg)](https://codecov.io/gh/mrf/llm-poe)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/mrf/llm-poe/actions)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
