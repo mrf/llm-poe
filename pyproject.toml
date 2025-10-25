@@ -84,6 +84,9 @@ addopts = [
     "--cov-report=html",
     "--cov-report=xml",
 ]
+markers = [
+    "httpx_mock: Custom marker for pytest-httpx mock configuration",
+]
 
 [tool.coverage.run]
 source = ["llm_poe"]
