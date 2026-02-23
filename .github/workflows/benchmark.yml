@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0  # Fetch all history for comparing with main branch
 
@@ -34,7 +34,7 @@ jobs:
         pytest tests/test_benchmarks.py --benchmark-only --benchmark-json=benchmark-current.json --benchmark-columns=min,max,mean,stddev,median,ops,rounds
 
     - name: Upload current benchmark results
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: benchmark-current
         path: benchmark-current.json
@@ -58,7 +58,7 @@ jobs:
 
     - name: Upload main benchmark results
       if: github.event_name == 'pull_request'
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: benchmark-main
         path: benchmark-main.json
@@ -252,7 +252,7 @@ jobs:
 
     - name: Upload benchmark report
       if: github.event_name == 'pull_request'
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: benchmark-report
         path: benchmark-report.md
