@@ -1,17 +1,48 @@
-# SQLite databases
+# Database
 *.db
 *.db-journal
-*.db-wal
 *.db-shm
+*.db-wal
 
-# Daemon runtime files
+# Lock files
+*.lock
+
+# Temporary
+last-touched
+*.tmp
+
+# Local history backups
+.br_history/
+
+# DB recovery artifacts
+.br_recovery/
+
+# Sync state (local-only, per-machine)
+.sync.lock
+sync_base.jsonl
+
+# Merge artifacts (temporary files from 3-way merge)
+beads.base.jsonl
+beads.base.meta.json
+beads.left.jsonl
+beads.left.meta.json
+beads.right.jsonl
+beads.right.meta.json
+
+# Runtime files
+daemon.lock
 daemon.log
 daemon.pid
-bd.sock
+sync-state.json
 
-# Legacy database files
-db.sqlite
-bd.db
+# Worktree redirect file
+redirect
 
-# Keep JSONL exports (source of truth for git)
-!*.jsonl
+# Backup data (legacy bd exports)
+backup/
+
+# Interactions log (runtime)
+interactions.jsonl
+
+# bv (beads viewer) lock file
+.bv.lock

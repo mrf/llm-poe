@@ -12,3 +12,6 @@ htmlcov/
 coverage.xml
 *.cover
 .hypothesis/
+
+# Worktrees
+worktrees/
