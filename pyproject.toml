@@ -53,7 +53,7 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "pytest>=7.0",
-    "pytest-httpx>=0.21.0",
+    "pytest-httpx>=0.35.0",
     "pytest-cov>=4.0",
     "pytest-asyncio>=0.21.0",
     "pytest-benchmark>=4.0"
