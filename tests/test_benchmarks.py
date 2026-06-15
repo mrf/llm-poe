@@ -300,6 +300,7 @@ class TestAPIResponseSimulation:
 
         prompt = Mock()
         prompt.prompt = "A beautiful sunset"
+        prompt.attachments = []
         prompt.options = Mock()
         prompt.options.temperature = 1.0
         prompt.options.max_tokens = None

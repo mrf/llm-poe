@@ -62,6 +62,9 @@ llm -m poe/gpt_4o "Hello, how are you?"
 # Image generation
 llm -m poe/flux_pro_1_1_ultra "Generate a cat image" --no-stream
 
+# Image-to-image (pass a reference image with -a)
+llm -m poe/nano_banana_pro "a matching weathered pressure gauge, same palette and rust" -a reference.png --no-stream
+
 # Video generation  
 llm -m poe/sora "Create a short video of a sunset" --no-stream
 
@@ -114,6 +117,10 @@ llm -m poe/claude_sonnet_4 "Tell me a story" -o temperature 0.7 -o max_tokens 50
 **Image Models:**
 ```bash
 llm -m poe/flux_pro_1_1_ultra "Generate landscape" -o size 1024x1024 -o quality standard --no-stream
+
+# Reference image (image-to-image): pass one or more -a attachments.
+# Supported types: image/png, image/jpeg, image/webp, image/gif.
+llm -m poe/nano_banana_pro "same palette and material, top-down sprite" -a ref.png --no-stream
 ```
 
 **Video Models:**

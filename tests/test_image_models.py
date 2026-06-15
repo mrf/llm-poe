@@ -40,6 +40,7 @@ class TestPoeImageModel:
 
         prompt = Mock()
         prompt.prompt = "A beautiful landscape"
+        prompt.attachments = []
         prompt.options = Mock()
         prompt.options.temperature = None
         prompt.options.max_tokens = None
@@ -64,6 +65,7 @@ class TestPoeImageModel:
 
         prompt = Mock()
         prompt.prompt = "A beautiful landscape"
+        prompt.attachments = []
         prompt.options = Mock()
         prompt.options.temperature = None
         prompt.options.max_tokens = None
@@ -177,6 +179,7 @@ class TestImageModelEdgeCases:
 
         prompt = Mock()
         prompt.prompt = "Abstract art"
+        prompt.attachments = []
         prompt.options = Mock()
         prompt.options.temperature = 1.5
         prompt.options.max_tokens = None
@@ -203,6 +206,7 @@ class TestImageModelEdgeCases:
 
         prompt = Mock()
         prompt.prompt = "A landscape"
+        prompt.attachments = []
         prompt.options = Mock()
         prompt.options.temperature = None
         prompt.options.max_tokens = None
@@ -218,3 +222,71 @@ class TestImageModelEdgeCases:
         # Should not raise an error
         results = list(model.execute(prompt, stream=False, response=mock_response, conversation=mock_empty_conversation))
         assert len(results) == 1
+
+
+class TestImageToImage:
+    """Test reference-image (image-to-image) support."""
+
+    def test_attachment_types_declared(self):
+        """Image models advertise the attachment types they accept."""
+        model = PoeImageModel("poe/nano_banana_pro", "nano_banana_pro")
+        assert model.attachment_types == {
+            "image/png",
+            "image/jpeg",
+            "image/webp",
+            "image/gif",
+        }
+
+    def test_reference_image_builds_content_blocks(self, httpx_mock, mock_api_key, mock_response, mock_empty_conversation, sample_image_response):
+        """A reference image is sent as a text + image_url content list."""
+        model = PoeImageModel("poe/nano_banana_pro", "nano_banana_pro")
+
+        attachment = Mock()
+        attachment.resolve_type.return_value = "image/png"
+        attachment.base64_content.return_value = "QUJD"  # base64 for "ABC"
+
+        prompt = Mock()
+        prompt.prompt = "a matching weathered gauge, same palette"
+        prompt.attachments = [attachment]
+        prompt.options = Mock()
+        prompt.options.temperature = None
+        prompt.options.max_tokens = None
+        prompt.options.size = "1024x1024"
+        prompt.options.quality = "standard"
+
+        httpx_mock.add_response(
+            url="https://api.poe.com/v1/chat/completions",
+            json=sample_image_response,
+        )
+
+        results = list(model.execute(prompt, stream=False, response=mock_response, conversation=mock_empty_conversation))
+
+        request = httpx_mock.get_requests()[0]
+        payload = json.loads(request.content)
+        content = payload["messages"][-1]["content"]
+
+        assert isinstance(content, list)
+        assert content[0] == {"type": "text", "text": "a matching weathered gauge, same palette"}
+        assert content[1] == {
+            "type": "image_url",
+            "image_url": {"url": "data:image/png;base64,QUJD"},
+        }
+        # The model still returns the generated image URL
+        assert len(results) == 1
+        assert "https://example.com/generated-image.png" in results[0]
+
+    def test_no_attachment_sends_plain_text(self, httpx_mock, mock_api_key, mock_image_prompt, mock_response, mock_empty_conversation, sample_image_response):
+        """Without attachments the user message content stays a plain string."""
+        model = PoeImageModel("poe/nano_banana_pro", "nano_banana_pro")
+
+        httpx_mock.add_response(
+            url="https://api.poe.com/v1/chat/completions",
+            json=sample_image_response,
+        )
+
+        list(model.execute(mock_image_prompt, stream=False, response=mock_response, conversation=mock_empty_conversation))
+
+        request = httpx_mock.get_requests()[0]
+        payload = json.loads(request.content)
+        content = payload["messages"][-1]["content"]
+        assert content == "A beautiful sunset over mountains"

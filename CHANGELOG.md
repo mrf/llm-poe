@@ -100,6 +100,15 @@ The plugin is now ready for testing and distribution, providing seamless integra
 ✅ Audio/TTS: `poe/elevenlabs_v3` → Generated audio URLs
 ✅ Video Generation: `poe/sora` → Generated video URLs
 
+## Reference-Image (Image-to-Image) Support (v0.5) - COMPLETED
+
+**Date:** 2026-06-15
+
+### Image-to-Image Generation
+- **Attachment support**: `PoeImageModel` now declares `attachment_types = {"image/png", "image/jpeg", "image/webp", "image/gif"}`, so `llm -m poe/<image_model> "..." -a ref.png` no longer errors with "model does not support attachments".
+- **Reference images**: When attachments are passed, the user message `content` is built as a list of `text` + `image_url` blocks (base64 data URLs), per Poe's OpenAI-compatible `/chat/completions` API. The returned image's style/material matches the reference.
+- **No behavior change for text-to-image**: When no attachment is passed, the user message is sent as plain text exactly as before. Conversation history remains text-only.
+
 ## Comprehensive Test Suite (v0.4) - COMPLETED
 
 **Date:** 2025-10-25

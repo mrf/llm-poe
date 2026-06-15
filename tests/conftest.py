@@ -157,6 +157,7 @@ def mock_prompt():
     """Mock llm.Prompt object."""
     prompt = Mock()
     prompt.prompt = "Test prompt"
+    prompt.attachments = []
     prompt.options = Mock()
     prompt.options.temperature = 1.0
     prompt.options.max_tokens = 100
@@ -168,6 +169,7 @@ def mock_image_prompt():
     """Mock prompt for image generation."""
     prompt = Mock()
     prompt.prompt = "A beautiful sunset over mountains"
+    prompt.attachments = []
     prompt.options = Mock()
     prompt.options.temperature = 1.0
     prompt.options.max_tokens = None
@@ -181,6 +183,7 @@ def mock_video_prompt():
     """Mock prompt for video generation."""
     prompt = Mock()
     prompt.prompt = "A cat playing piano"
+    prompt.attachments = []
     prompt.options = Mock()
     prompt.options.temperature = 1.0
     prompt.options.max_tokens = None
@@ -194,6 +197,7 @@ def mock_audio_prompt():
     """Mock prompt for audio generation."""
     prompt = Mock()
     prompt.prompt = "Hello, this is a test message"
+    prompt.attachments = []
     prompt.options = Mock()
     prompt.options.temperature = 1.0
     prompt.options.max_tokens = None

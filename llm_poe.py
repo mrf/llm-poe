@@ -6,7 +6,7 @@ import json
 import time
 import os
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 POE_API_BASE = "https://api.poe.com/v1"
 
@@ -285,6 +285,9 @@ class PoeModel(llm.Model):
 class PoeImageModel(PoeModel):
     can_stream = False  # Image generation typically doesn't stream
 
+    # Reference images for image-to-image generation
+    attachment_types = {"image/png", "image/jpeg", "image/webp", "image/gif"}
+
     class Options(PoeImageOptions):
         pass
 
@@ -302,10 +305,21 @@ class PoeImageModel(PoeModel):
             for prev_response in conversation.responses:
                 messages.append({"role": "user", "content": prev_response.prompt.prompt})
                 messages.append({"role": "assistant", "content": prev_response.text()})
-        
-        # For image models, we still use the standard chat format
-        # The model should understand image generation prompts
-        messages.append({"role": "user", "content": prompt.prompt})
+
+        # For image models, we still use the standard chat format.
+        # When reference images are attached, send a content list of text +
+        # image_url blocks (image-to-image); otherwise plain text.
+        atts = list(getattr(prompt, "attachments", None) or [])
+        if atts:
+            content = [{"type": "text", "text": prompt.prompt}]
+            for a in atts:
+                content.append({
+                    "type": "image_url",
+                    "image_url": {"url": f"data:{a.resolve_type()};base64,{a.base64_content()}"},
+                })
+        else:
+            content = prompt.prompt
+        messages.append({"role": "user", "content": content})
 
         payload = {
             "model": self.model_name,
