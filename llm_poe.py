@@ -6,7 +6,7 @@ import json
 import time
 import os
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 POE_API_BASE = "https://api.poe.com/v1"
 
@@ -88,28 +88,64 @@ def fetch_available_models() -> List[Dict[str, Any]]:
         return FALLBACK_MODELS
 
 
-def get_model_type(model_name: str) -> str:
-    """Determine model type from name patterns and known model families."""
+def get_model_type(model_data) -> str:
+    """Determine model type from the Poe API's architecture modalities.
+
+    Accepts either a model_data dict (as returned by ``fetch_available_models``)
+    or a plain model name string (legacy callers / fallback path). When the
+    architecture's ``output_modalities`` are available they are the source of
+    truth — a model that *outputs* images is an image model, regardless of its
+    name. When that signal is missing (older/edge models), fall back to the
+    name-keyword heuristic.
+    """
+    if isinstance(model_data, dict):
+        architecture = model_data.get("architecture") or {}
+        model_name = model_data.get("id", "")
+    else:
+        architecture = {}
+        model_name = model_data or ""
+
+    output_modalities = architecture.get("output_modalities") or []
+    if output_modalities:
+        if "image" in output_modalities:
+            return "image"
+        if "video" in output_modalities:
+            return "video"
+        if "audio" in output_modalities:
+            return "audio"
+        # Architecture is present but produces no media — a text model.
+        return "text"
+
+    # Fallback: no architecture signal, classify by name keywords.
+    return get_model_type_by_name(model_name)
+
+
+def get_model_type_by_name(model_name: str) -> str:
+    """Determine model type from name patterns and known model families.
+
+    Used as a fallback when the Poe API does not expose architecture
+    modalities for a model.
+    """
     name_lower = model_name.lower()
-    
+
     # Image generation models
     image_indicators = [
         'imagen', 'dall', 'flux', 'ideogram', 'recraft', 'phoenix', 'midjourney',
         'stable', 'diffusion', 'draw', 'generate', 'create', 'art', 'picture', 'image'
     ]
-    
-    # Video generation models  
+
+    # Video generation models
     video_indicators = [
         'veo', 'sora', 'runway', 'kling', 'hailuo', 'dream', 'pika', 'video',
         'motion', 'animate', 'film', 'movie'
     ]
-    
+
     # Audio/TTS models
     audio_indicators = [
         'elevenlabs', 'cartesia', 'playai', 'orpheus', 'lyria', 'tts', 'speech',
         'voice', 'audio', 'speak', 'sound', 'music'
     ]
-    
+
     # Check for type indicators (check more specific ones first)
     # Check audio first as it has more specific names
     if any(indicator in name_lower for indicator in audio_indicators):
@@ -118,7 +154,7 @@ def get_model_type(model_name: str) -> str:
         return 'video'
     elif any(indicator in name_lower for indicator in image_indicators):
         return 'image'
-    
+
     # Default to text for traditional LLMs
     return 'text'
 
@@ -207,9 +243,17 @@ class PoeModel(llm.Model):
     class Options(PoeOptions):
         pass
 
-    def __init__(self, model_id: str, model_name: str):
+    def __init__(self, model_id: str, model_name: str, input_modalities: Optional[List[str]] = None):
         self.model_id = model_id
         self.model_name = model_name
+        # Drive accepted attachment types from the model's INPUT modalities, per
+        # instance — a model that accepts image input (e.g. nano-banana-pro)
+        # exposes image attachment types, while a text-only model does not.
+        in_mods = set(input_modalities or [])
+        types = set()
+        if "image" in in_mods:
+            types |= {"image/png", "image/jpeg", "image/webp", "image/gif"}
+        self.attachment_types = types
 
     def __str__(self):
         # Display cleaner name in model listings
@@ -285,8 +329,8 @@ class PoeModel(llm.Model):
 class PoeImageModel(PoeModel):
     can_stream = False  # Image generation typically doesn't stream
 
-    # Reference images for image-to-image generation
-    attachment_types = {"image/png", "image/jpeg", "image/webp", "image/gif"}
+    # NOTE: attachment_types is set per-instance in PoeModel.__init__ from the
+    # model's input modalities (image-to-image support is model-dependent).
 
     class Options(PoeImageOptions):
         pass
@@ -503,32 +547,37 @@ def register_models(register):
             if model_name:
                 # Create a clean model_id for LLM
                 model_id = f"poe/{model_name.lower().replace('-', '_').replace('.', '_').replace(' ', '_')}"
-                
-                # Determine model type and use appropriate class
-                model_type = get_model_type(model_name)
-                
+
+                # Determine model type from architecture (falls back to name).
+                model_type = get_model_type(model_data)
+                architecture = model_data.get("architecture") or {}
+                input_modalities = architecture.get("input_modalities") or []
+
                 if model_type == 'image':
-                    register(PoeImageModel(model_id, model_name))
+                    register(PoeImageModel(model_id, model_name, input_modalities))
                 elif model_type == 'video':
-                    register(PoeVideoModel(model_id, model_name))
+                    register(PoeVideoModel(model_id, model_name, input_modalities))
                 elif model_type == 'audio':
-                    register(PoeAudioModel(model_id, model_name))
+                    register(PoeAudioModel(model_id, model_name, input_modalities))
                 else:
-                    register(PoeModel(model_id, model_name))
+                    register(PoeModel(model_id, model_name, input_modalities))
     except Exception as e:
         # Register fallback models if dynamic loading fails
         for model_data in FALLBACK_MODELS:
             model_name = model_data["id"]
             model_id = f"poe/{model_name.lower().replace('-', '_')}"
-            
-            # Apply type detection to fallback models too
-            model_type = get_model_type(model_name)
-            
+
+            # Apply type detection to fallback models too (architecture-aware,
+            # falls back to name keywords for the bare fallback entries).
+            model_type = get_model_type(model_data)
+            architecture = model_data.get("architecture") or {}
+            input_modalities = architecture.get("input_modalities") or []
+
             if model_type == 'image':
-                register(PoeImageModel(model_id, model_name))
+                register(PoeImageModel(model_id, model_name, input_modalities))
             elif model_type == 'video':
-                register(PoeVideoModel(model_id, model_name))
+                register(PoeVideoModel(model_id, model_name, input_modalities))
             elif model_type == 'audio':
-                register(PoeAudioModel(model_id, model_name))
+                register(PoeAudioModel(model_id, model_name, input_modalities))
             else:
-                register(PoeModel(model_id, model_name))
+                register(PoeModel(model_id, model_name, input_modalities))

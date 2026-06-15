@@ -147,6 +147,63 @@ class TestGetModelType:
         assert get_model_type("Video-Image-Creator") == "video"
 
 
+class TestGetModelTypeFromArchitecture:
+    """Architecture output_modalities are the source of truth for type."""
+
+    def test_image_output_classifies_as_image(self):
+        """A model that outputs images is an image model regardless of name."""
+        assert get_model_type(
+            {"id": "nano-banana-pro",
+             "architecture": {"input_modalities": ["text", "image"],
+                              "output_modalities": ["image"]}}
+        ) == "image"
+
+    def test_text_input_image_output_still_image(self):
+        """nano-banana-2 (text in, image out) is an image model."""
+        assert get_model_type(
+            {"id": "nano-banana-2",
+             "architecture": {"input_modalities": ["text"],
+                              "output_modalities": ["image"]}}
+        ) == "image"
+
+    def test_video_output_classifies_as_video(self):
+        assert get_model_type(
+            {"id": "some-model", "architecture": {"output_modalities": ["video"]}}
+        ) == "video"
+
+    def test_audio_output_classifies_as_audio(self):
+        assert get_model_type(
+            {"id": "some-model", "architecture": {"output_modalities": ["audio"]}}
+        ) == "audio"
+
+    def test_text_output_classifies_as_text(self):
+        """A vision model that outputs text is a text model, not image."""
+        assert get_model_type(
+            {"id": "claude-opus-4.8",
+             "architecture": {"input_modalities": ["text", "image"],
+                              "output_modalities": ["text"]}}
+        ) == "text"
+
+    def test_architecture_overrides_misleading_name(self):
+        """seedream (matches 'dream' video keyword) is image by architecture."""
+        assert get_model_type(
+            {"id": "seedream-5.0-lite",
+             "architecture": {"input_modalities": ["text"],
+                              "output_modalities": ["image"]}}
+        ) == "image"
+
+    def test_missing_architecture_falls_back_to_name(self):
+        """No architecture signal → name heuristic."""
+        assert get_model_type({"id": "Flux-Pro"}) == "image"
+        assert get_model_type({"id": "GPT-4o"}) == "text"
+
+    def test_empty_output_modalities_falls_back_to_name(self):
+        """Empty output_modalities → name heuristic."""
+        assert get_model_type(
+            {"id": "Flux-Pro", "architecture": {"output_modalities": []}}
+        ) == "image"
+
+
 class TestDetectModelTypeDynamically:
     """Test the detect_model_type_dynamically function."""
 

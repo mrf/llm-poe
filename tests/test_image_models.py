@@ -228,14 +228,21 @@ class TestImageToImage:
     """Test reference-image (image-to-image) support."""
 
     def test_attachment_types_declared(self):
-        """Image models advertise the attachment types they accept."""
-        model = PoeImageModel("poe/nano_banana_pro", "nano_banana_pro")
+        """Image models that accept image input advertise image attachment types."""
+        model = PoeImageModel(
+            "poe/nano_banana_pro", "nano_banana_pro", ["text", "image"]
+        )
         assert model.attachment_types == {
             "image/png",
             "image/jpeg",
             "image/webp",
             "image/gif",
         }
+
+    def test_attachment_types_empty_without_image_input(self):
+        """Image models that only accept text input declare no attachment types."""
+        model = PoeImageModel("poe/nano_banana_2", "nano_banana_2", ["text"])
+        assert model.attachment_types == set()
 
     def test_reference_image_builds_content_blocks(self, httpx_mock, mock_api_key, mock_response, mock_empty_conversation, sample_image_response):
         """A reference image is sent as a text + image_url content list."""

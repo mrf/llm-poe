@@ -120,6 +120,9 @@ llm -m poe/flux_pro_1_1_ultra "Generate landscape" -o size 1024x1024 -o quality 
 
 # Reference image (image-to-image): pass one or more -a attachments.
 # Supported types: image/png, image/jpeg, image/webp, image/gif.
+# Attachment support is detected per-model from the Poe API's input
+# modalities, so only models that actually accept image input (e.g.
+# nano_banana_pro) expose -a; text-only-input models correctly reject it.
 llm -m poe/nano_banana_pro "same palette and material, top-down sprite" -a ref.png --no-stream
 ```
 

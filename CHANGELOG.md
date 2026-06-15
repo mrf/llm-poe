@@ -100,6 +100,19 @@ The plugin is now ready for testing and distribution, providing seamless integra
 ✅ Audio/TTS: `poe/elevenlabs_v3` → Generated audio URLs
 ✅ Video Generation: `poe/sora` → Generated video URLs
 
+## Modality-Based Model Classification (v0.6) - COMPLETED
+
+**Date:** 2026-06-15
+
+### Architecture-driven type detection
+- **Root cause fixed**: `get_model_type()` previously classified models by name keywords, so image models with non-obvious names (e.g. `nano_banana_pro`) registered as plain text models with no attachment support, and names like `seedream` were misclassified as "video" (matched the `dream` keyword). It now classifies from the Poe API's `architecture.output_modalities` (`image`/`video`/`audio`/`text`), with the name-keyword heuristic kept only as a fallback when architecture data is absent. The legacy keyword logic moved to `get_model_type_by_name()`.
+- **Per-instance attachment types**: `attachment_types` is no longer a fixed class constant on `PoeImageModel`. It is derived per model instance from `architecture.input_modalities` in `PoeModel.__init__` — a model that accepts image input (e.g. `nano_banana_pro`, in: `[text, image]`) advertises image attachment types, while a text-only-input image model (e.g. `nano_banana_2`, in: `[text]`) correctly advertises none. This also lets vision text models accept image input.
+- **Registration**: `register_models` now passes `model_data` into `get_model_type` and `input_modalities` into every model constructor (`PoeModel`/`PoeImageModel`/`PoeVideoModel`/`PoeAudioModel`), for both the live and fallback paths.
+- **Result**: `llm -m poe/nano_banana_pro "..." -a ref.png` now returns a generated image URL instead of "This model does not support attachments".
+
+### Packaging
+- Declared the single top-level module explicitly via `[tool.setuptools] py-modules = ["llm_poe"]` so setuptools auto-discovery no longer mistakes a stray (gitignored) `worktrees/` directory for the package and drops `llm_poe.py` from the build.
+
 ## Reference-Image (Image-to-Image) Support (v0.5) - COMPLETED
 
 **Date:** 2026-06-15
