@@ -1,5 +1,10 @@
 # llm-poe
 
+> [!IMPORTANT]
+> **This project is archived and no longer maintained.**
+>
+> I've stopped using Poe, and the platform has changed enough that I can't keep this project working the way it deserves. The code stays here as-is under its license, so feel free to fork it if it's still useful to you. Thanks to everyone who tried it out.
+
 [![Tests](https://github.com/mrf/llm-poe/actions/workflows/test.yml/badge.svg)](https://github.com/mrf/llm-poe/actions/workflows/test.yml)
 [![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/mrf/llm-poe/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
